@@ -29,31 +29,35 @@ const generateRandomID = () => {
 
 
 //-------------------ROUTES------------------------\\
-//get the URLS page, render urls_index and pass urlDatabase as templateVars.
-app.get('/urls', (req, res) => {
-  const templateVars = { urls: urlDatabase };
-  res.render('urls_index', templateVars);
-});
-
 //get the new URL form page
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
-//POST the URL created from /urls/new to /urls
+//POST the URL created from /urls/new to /urls then render /urls:id for new URL 
+//Add new URL to urlDatabase in format id: longURL
 app.post("/urls", (req, res) => {
-  console.log(req.body); // Log the POST request body to the console
-  res.send("Ok"); // Respond with 'Ok' (we will replace this)
-});
-
-//get the URL for the shortened id and render that page. id is the shortURL id
-//e.g. /urls/b2xVn2 is the url path for shortURL id b2xVn2
-app.get('/urls/:id', (req, res) => {
-  id = req.params.id;
-  const longURL = urlDatabase[id];
+  const longURL = req.body.longURL;
+  const id = generateRandomID();
+  urlDatabase[id] = longURL;
   const templateVars = { longURL, id };
   res.render('urls_show', templateVars);
+});
 
+//get longURL page by pressing its shortURL on urls_show template. 
+//id is the shortURL id
+//e.g. /u/b2xVn2 is the url path for shortURL id b2xVn2
+app.get('/u/:id', (req, res) => {
+  id = req.params.id;
+  const longURL = urlDatabase[id];
+  res.redirect(longURL);
+
+});
+
+//get the URLS page, render urls_index and pass urlDatabase as templateVars.
+app.get('/urls', (req, res) => {
+  const templateVars = { urls: urlDatabase };
+  res.render('urls_index', templateVars);
 });
 
 app.listen(PORT, () => {
