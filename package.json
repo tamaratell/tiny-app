@@ -16,5 +16,9 @@
   "bugs": {
     "url": "https://github.com/tamaratell/tiny-app/issues"
   },
-  "homepage": "https://github.com/tamaratell/tiny-app#readme"
+  "homepage": "https://github.com/tamaratell/tiny-app#readme",
+  "dependencies": {
+    "ejs": "^3.1.9",
+    "express": "^4.18.2"
+  }
 }
