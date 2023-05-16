@@ -1,5 +1,6 @@
 //-------------------SETUP------------------------\\
 const express = require('express');
+const req = require('express/lib/request');
 const app = express();
 const PORT = 8080;
 
@@ -54,11 +55,22 @@ app.get('/u/:id', (req, res) => {
 
 });
 
-//get the URLS page, render urls_index and pass urlDatabase as templateVars.
-app.get('/urls', (req, res) => {
-  const templateVars = { urls: urlDatabase };
-  res.render('urls_index', templateVars);
+//go to the edit page for a link from the homepage by clicking the edit button
+app.post('/urls/:id', (req, res) => {
+  id = req.params.id;
+  const templateVars = { id, longURL: urlDatabase[id] };
+  res.render('urls_show', templateVars);
 });
+
+//edit a longURL using the form on /urls/:id (edit page)
+app.post('/urls/:id/edit', (req, res) => {
+  const longURL = req.body.longURL;
+  const id = req.params.id;
+  urlDatabase[id] = longURL;
+  console.log(urlDatabase);
+  res.redirect('/urls');
+});
+
 
 //delete a URL resource (and remove it from url Database)
 app.post('/urls/:id/delete', (req, res) => {
@@ -66,6 +78,13 @@ app.post('/urls/:id/delete', (req, res) => {
   delete urlDatabase[id];
   res.redirect('/urls');
 });
+
+//get the URLS page, render urls_index and pass urlDatabase as templateVars.
+app.get('/urls', (req, res) => {
+  const templateVars = { urls: urlDatabase };
+  res.render('urls_index', templateVars);
+});
+
 
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
