@@ -1,6 +1,7 @@
 //-------------------SETUP------------------------\\
 const express = require('express');
 const req = require('express/lib/request');
+const { cookie } = require('express/lib/response');
 const app = express();
 const PORT = 8080;
 
@@ -62,7 +63,7 @@ app.post('/urls/:id', (req, res) => {
   res.render('urls_show', templateVars);
 });
 
-//edit a longURL using the form on /urls/:id (edit page)
+//update a longURL (and the database) using the form on /urls/:id (edit page)
 app.post('/urls/:id/edit', (req, res) => {
   const longURL = req.body.longURL;
   const id = req.params.id;
@@ -76,6 +77,13 @@ app.post('/urls/:id/edit', (req, res) => {
 app.post('/urls/:id/delete', (req, res) => {
   const id = req.params.id;
   delete urlDatabase[id];
+  res.redirect('/urls');
+});
+
+//login
+app.post('/login', (req, res) => {
+  const username = req.body.username;
+  res.cookie('username', `${username}`);
   res.redirect('/urls');
 });
 
