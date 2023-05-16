@@ -60,6 +60,13 @@ app.get('/urls', (req, res) => {
   res.render('urls_index', templateVars);
 });
 
+//delete a URL resource (and remove it from url Database)
+app.post('/urls/:id/delete', (req, res) => {
+  const id = req.params.id;
+  delete urlDatabase[id];
+  res.redirect('/urls');
+});
+
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
 });
