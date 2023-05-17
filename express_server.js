@@ -19,6 +19,18 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const users = {
+  userRandomID: {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "123",
+  },
+  user2RandomID: {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "123",
+  },
+};
 //-------------------FUNCTIONS------------------------\\
 
 const generateRandomID = () => {
@@ -32,23 +44,30 @@ const generateRandomID = () => {
   return id;
 };
 
+const getUserbyID = (user_id) => {
+  for (const user in users) {
+    if (user === user_id) {
+      return users[user];
+    }
+  }
+};
 
 
 //-------------------ROUTES------------------------\\
 //get the new URL form page
 app.get("/urls/new", (req, res) => {
-  const templateVars = { username: req.cookies["username"] };
+  const templateVars = { user: getUserbyID(req.cookies["user_id"]) };
   res.render("urls_new", templateVars);
 });
 
 //POST the URL created from /urls/new to /urls then render /urls:id for new URL 
 //Add new URL to urlDatabase in format id: longURL
 app.post("/urls", (req, res) => {
-  const username = req.cookies["username"];
+  const user = getUserbyID(req.cookies["user_id"]);
   const longURL = req.body.longURL;
   const id = generateRandomID();
   urlDatabase[id] = longURL;
-  const templateVars = { longURL, id, username };
+  const templateVars = { longURL, id, user };
   res.render('urls_show', templateVars);
 });
 
@@ -64,9 +83,9 @@ app.get('/u/:id', (req, res) => {
 
 //go to the edit page for a link from the homepage by clicking the edit button
 app.post('/urls/:id', (req, res) => {
-  const username = req.cookies["username"];
+  const user = getUserbyID(req.cookies["user_id"]);
   id = req.params.id;
-  const templateVars = { id, longURL: urlDatabase[id], username };
+  const templateVars = { id, longURL: urlDatabase[id], user };
   res.render('urls_show', templateVars);
 });
 
@@ -87,36 +106,43 @@ app.post('/urls/:id/delete', (req, res) => {
   res.redirect('/urls');
 });
 
-//login && set cookie
+//login && set cookie //NOT WORKING PROPERLY YET, NEED TO UPDATE
 app.post('/login', (req, res) => {
-  const username = req.body.username;
+  const email = req.body.email;
+  const password = req.body.password;
   res.cookie('username', `${username}`);
   res.redirect('/urls');
 });
 
+//go to the registration page
 app.get('/register', (req, res) => {
-  const username = req.body.username;
-  const templateVars = { username };
+  const user = getUserbyID(req.cookies["user_id"]);
+  const templateVars = { user };
   res.render('urls_register', templateVars);
 });
 
-//register
+//register && set cookie
 app.post('/register', (req, res) => {
-  console.log(req.body);
+  const email = req.body.email;
+  const password = req.body.password;
+  const id = generateRandomID();
+  users[id] = { id, email, password };
+  console.log(users);
+  res.cookie('user_id', `${id}`);
   res.redirect('/urls');
 });
 
 //logout && clear cookies
 app.post('/logout', (req, res) => {
-  const username = req.cookies["username"];
-  res.clearCookie('username');
+  res.clearCookie('user_id');
   res.redirect('/urls');
 });
 
 //get the URLS page, render urls_index and pass urlDatabase as templateVars.
 app.get('/urls', (req, res) => {
-  const username = req.cookies["username"];
-  const templateVars = { urls: urlDatabase, username };
+  const user = getUserbyID(req.cookies["user_id"]);
+  const templateVars = { urls: urlDatabase, user };
+  console.log(templateVars);
   res.render('urls_index', templateVars);
 });
 
