@@ -93,6 +93,13 @@ app.post('/login', (req, res) => {
   res.redirect('/urls');
 });
 
+//logout
+app.post('/logout', (req, res) => {
+  const username = req.cookies["username"];
+  res.clearCookie('username');
+  res.redirect('/urls');
+});
+
 //get the URLS page, render urls_index and pass urlDatabase as templateVars.
 app.get('/urls', (req, res) => {
   const username = req.cookies["username"];
