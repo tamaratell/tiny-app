@@ -1,13 +1,16 @@
 //-------------------SETUP------------------------\\
 const express = require('express');
 const req = require('express/lib/request');
-const { cookie } = require('express/lib/response');
+const cookieParser = require('cookie-parser');
 const app = express();
 const PORT = 8080;
 
 app.set("view engine", "ejs");
+
+//------------------MIDDLEWARE---------------------\\
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
 
 //-------------------OBJECTS------------------------\\
 const urlDatabase = {
@@ -33,16 +36,18 @@ const generateRandomID = () => {
 //-------------------ROUTES------------------------\\
 //get the new URL form page
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const username = req.cookies["username"];
+  res.render("urls_new", username);
 });
 
 //POST the URL created from /urls/new to /urls then render /urls:id for new URL 
 //Add new URL to urlDatabase in format id: longURL
 app.post("/urls", (req, res) => {
+  const username = req.cookies["username"];
   const longURL = req.body.longURL;
   const id = generateRandomID();
   urlDatabase[id] = longURL;
-  const templateVars = { longURL, id };
+  const templateVars = { longURL, id, username };
   res.render('urls_show', templateVars);
 });
 
@@ -58,8 +63,9 @@ app.get('/u/:id', (req, res) => {
 
 //go to the edit page for a link from the homepage by clicking the edit button
 app.post('/urls/:id', (req, res) => {
+  const username = req.cookies["username"];
   id = req.params.id;
-  const templateVars = { id, longURL: urlDatabase[id] };
+  const templateVars = { id, longURL: urlDatabase[id], username };
   res.render('urls_show', templateVars);
 });
 
@@ -89,7 +95,8 @@ app.post('/login', (req, res) => {
 
 //get the URLS page, render urls_index and pass urlDatabase as templateVars.
 app.get('/urls', (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const username = req.cookies["username"];
+  const templateVars = { urls: urlDatabase, username };
   res.render('urls_index', templateVars);
 });
 
