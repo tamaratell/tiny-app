@@ -2,6 +2,7 @@
 const express = require('express');
 const req = require('express/lib/request');
 const cookieParser = require('cookie-parser');
+const res = require('express/lib/response');
 const app = express();
 const PORT = 8080;
 
@@ -36,8 +37,8 @@ const generateRandomID = () => {
 //-------------------ROUTES------------------------\\
 //get the new URL form page
 app.get("/urls/new", (req, res) => {
-  const username = req.cookies["username"];
-  res.render("urls_new", username);
+  const templateVars = { username: req.cookies["username"] };
+  res.render("urls_new", templateVars);
 });
 
 //POST the URL created from /urls/new to /urls then render /urls:id for new URL 
@@ -90,6 +91,18 @@ app.post('/urls/:id/delete', (req, res) => {
 app.post('/login', (req, res) => {
   const username = req.body.username;
   res.cookie('username', `${username}`);
+  res.redirect('/urls');
+});
+
+app.get('/register', (req, res) => {
+  const username = req.body.username;
+  const templateVars = { username };
+  res.render('urls_register', templateVars);
+});
+
+//register
+app.post('/register', (req, res) => {
+  console.log(req.body);
   res.redirect('/urls');
 });
 
