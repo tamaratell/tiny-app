@@ -119,11 +119,14 @@ app.post('/urls/:id/delete', (req, res) => {
 //get the login page
 app.get('/login', (req, res) => {
   const user = getUserbyID(req.cookies["user_id"]);
+  if (user) {
+    return res.redirect('/urls');
+  }
   const templateVars = { user };
   res.render('urls_login', templateVars);
 });
 
-//login && set cookie //NOT WORKING PROPERLY YET, NEED TO UPDATE
+//login && set cookie 
 app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
@@ -153,6 +156,9 @@ app.post('/login', (req, res) => {
 //get the registration page
 app.get('/register', (req, res) => {
   const user = getUserbyID(req.cookies["user_id"]);
+  if (user) {
+    return res.redirect('/urls');
+  }
   const templateVars = { user };
   res.render('urls_register', templateVars);
 });
