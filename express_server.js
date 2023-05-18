@@ -15,13 +15,19 @@ app.use(cookieParser());
 
 //-------------------OBJECTS------------------------\\
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW",
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW",
+  },
 };
 
 const users = {
   userRandomID: {
-    id: "userRandomID",
+    id: "aJ48lW",
     email: "user@example.com",
     password: "123",
   },
@@ -75,7 +81,7 @@ app.get("/urls/new", (req, res) => {
 });
 
 //POST the URL created from /urls/new to /urls then render /urls:id for new URL 
-//Add new URL to urlDatabase in format id: longURL
+//Add new URL to urlDatabase in format id: longURL.
 app.post("/urls", (req, res) => {
   const user = getUserbyID(req.cookies["user_id"]);
   if (!user) {
@@ -83,7 +89,8 @@ app.post("/urls", (req, res) => {
   }
   const longURL = req.body.longURL;
   const id = generateRandomID();
-  urlDatabase[id] = longURL;
+  urlDatabase[id] = { longURL, userID: user.id };
+  console.log(urlDatabase);
   const templateVars = { longURL, id, user };
   res.render('urls_show', templateVars);
 });
@@ -93,7 +100,7 @@ app.post("/urls", (req, res) => {
 //e.g. /u/b2xVn2 is the url path for shortURL id b2xVn2
 app.get('/u/:id', (req, res) => {
   id = req.params.id;
-  const longURL = urlDatabase[id];
+  const longURL = urlDatabase[id].longURL;
   if (!longURL) {
     res.status(404).send("URL not found :(");
   }
@@ -105,7 +112,7 @@ app.get('/u/:id', (req, res) => {
 app.post('/urls/:id', (req, res) => {
   const user = getUserbyID(req.cookies["user_id"]);
   id = req.params.id;
-  const templateVars = { id, longURL: urlDatabase[id], user };
+  const templateVars = { id, longURL: urlDatabase[id].longURL, user };
   res.render('urls_show', templateVars);
 });
 
@@ -113,7 +120,7 @@ app.post('/urls/:id', (req, res) => {
 app.post('/urls/:id/edit', (req, res) => {
   const longURL = req.body.longURL;
   const id = req.params.id;
-  urlDatabase[id] = longURL;
+  urlDatabase[id].longURL = longURL;
   console.log(urlDatabase);
   res.redirect('/urls');
 });
