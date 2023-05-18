@@ -181,7 +181,7 @@ app.post('/register', (req, res) => {
 //logout && clear cookies
 app.post('/logout', (req, res) => {
   res.clearCookie('user_id');
-  res.redirect('/urls');
+  res.redirect('/login');
 });
 
 //get the URLS page, render urls_index and pass urlDatabase as templateVars.
