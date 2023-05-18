@@ -59,6 +59,7 @@ const getUserByEmail = (user_email) => {
       return userInformation;
     }
   }
+  return null;
 };
 
 
@@ -134,9 +135,19 @@ app.get('/register', (req, res) => {
 app.post('/register', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
+
+  if (email === "" || password === "") {
+    res.status(400).send("Error: credentials cannot be empty");
+    return;
+  }
+
+  if (getUserByEmail(email)) {
+    res.status(400).send("Please try again");
+    return;
+  }
+
   const id = generateRandomID();
   users[id] = { id, email, password };
-  console.log(users);
   res.cookie('user_id', `${id}`);
   res.redirect('/urls');
 });
