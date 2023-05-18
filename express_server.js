@@ -116,6 +116,13 @@ app.post('/urls/:id/delete', (req, res) => {
   res.redirect('/urls');
 });
 
+//go to the registration page
+app.get('/login', (req, res) => {
+  const user = getUserbyID(req.cookies["user_id"]);
+  const templateVars = { user };
+  res.render('urls_login', templateVars);
+});
+
 //login && set cookie //NOT WORKING PROPERLY YET, NEED TO UPDATE
 app.post('/login', (req, res) => {
   const email = req.body.email;

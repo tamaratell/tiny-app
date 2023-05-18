@@ -23,11 +23,12 @@
             <% if(!user) {%>
               <form class="form-inline" action="/login" method="POST">
                 <div class="form-group mb-2">
-                  <input class="form-control" type="email" name="email" placeholder="email"
+                  <!-- <input class="form-control" type="email" name="email" placeholder="email"
                     style="width: 200px; margin: 1em 0.2em 1em  1em" />
                   <input class="form-control" type="password" name="password" placeholder="password"
-                    style="width: 200px; margin: 1em 1em 1em 0.2em" />
-                  <button type="submit" class="btn btn-primary">Login</button>
+                    style="width: 200px; margin: 1em 1em 1em 0.2em" /> -->
+                  <a href="/login" <button type="submit" class="btn btn-primary">Login</button>
+                  </a>
                   <a href="/register" <button style="margin-left: 0.5em" type="submit"
                     class="btn btn-primary">Register</button>
                   </a>
