@@ -52,6 +52,15 @@ const getUserbyID = (user_id) => {
   }
 };
 
+const getUserByEmail = (user_email) => {
+  for (const user in users) {
+    const userInformation = users[user];
+    if (userInformation.email === user_email) {
+      return userInformation;
+    }
+  }
+};
+
 
 //-------------------ROUTES------------------------\\
 //get the new URL form page
