@@ -116,7 +116,7 @@ app.post('/urls/:id/delete', (req, res) => {
   res.redirect('/urls');
 });
 
-//go to the registration page
+//get the login page
 app.get('/login', (req, res) => {
   const user = getUserbyID(req.cookies["user_id"]);
   const templateVars = { user };
@@ -127,11 +127,30 @@ app.get('/login', (req, res) => {
 app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  res.cookie('username', `${username}`);
-  res.redirect('/urls');
+  const user = getUserByEmail(email);
+
+  if (email === "" || password === "") {
+    res.status(400).send("Error: credentials cannot be empty");
+    return;
+  }
+
+  if (!user) {
+    res.status(404).send("Invalid credentials");
+    return;
+  }
+
+  if (user) {
+    if (password !== user.password) {
+      res.status(404).send("Invalid credentials");
+      return;
+    }
+    res.cookie('user_id', `${user.id}`);
+    res.redirect('/urls');
+  }
+
 });
 
-//go to the registration page
+//get the registration page
 app.get('/register', (req, res) => {
   const user = getUserbyID(req.cookies["user_id"]);
   const templateVars = { user };
