@@ -66,7 +66,11 @@ const getUserByEmail = (user_email) => {
 //-------------------ROUTES------------------------\\
 //get the new URL form page
 app.get("/urls/new", (req, res) => {
-  const templateVars = { user: getUserbyID(req.cookies["user_id"]) };
+  const user = getUserbyID(req.cookies["user_id"]);
+  if (!user) {
+    return res.redirect('/login');
+  }
+  const templateVars = { user };
   res.render("urls_new", templateVars);
 });
 
@@ -74,6 +78,9 @@ app.get("/urls/new", (req, res) => {
 //Add new URL to urlDatabase in format id: longURL
 app.post("/urls", (req, res) => {
   const user = getUserbyID(req.cookies["user_id"]);
+  if (!user) {
+    return res.status(304).send("Only logged in users can shorten URLs");
+  }
   const longURL = req.body.longURL;
   const id = generateRandomID();
   urlDatabase[id] = longURL;
