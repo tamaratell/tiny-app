@@ -68,6 +68,16 @@ const getUserByEmail = (user_email) => {
   return null;
 };
 
+const getURLSforUser = (user_id) => {
+  let urlsForUser = {};
+  for (const url in urlDatabase) {
+    if (urlDatabase[url].userID === user_id) {
+      urlsForUser[url] = urlDatabase[url];
+    }
+  }
+  return urlsForUser;
+};
+
 
 //-------------------ROUTES------------------------\\
 //get the new URL form page
@@ -155,13 +165,13 @@ app.post('/login', (req, res) => {
   }
 
   if (!user) {
-    res.status(404).send("Invalid credentials");
+    res.status(401).send("Invalid credentials");
     return;
   }
 
   if (user) {
     if (password !== user.password) {
-      res.status(404).send("Invalid credentials");
+      res.status(401).send("Invalid credentials");
       return;
     }
     res.cookie('user_id', `${user.id}`);
@@ -186,12 +196,12 @@ app.post('/register', (req, res) => {
   const password = req.body.password;
 
   if (email === "" || password === "") {
-    res.status(400).send("Error: credentials cannot be empty");
+    res.status(404).send("Error: credentials cannot be empty");
     return;
   }
 
   if (getUserByEmail(email)) {
-    res.status(400).send("Please try again");
+    res.status(401).send("Error: Please try again");
     return;
   }
 
@@ -219,3 +229,5 @@ app.get('/urls', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
 });
+
+//res.status(403).send("You must be logged in to view URLS");
