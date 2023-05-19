@@ -2,6 +2,7 @@
 const express = require('express');
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
+const methodOverride = require('method-override');
 const app = express();
 const PORT = 8080;
 
@@ -9,7 +10,8 @@ app.set("view engine", "ejs");
 
 //------------------MIDDLEWARE---------------------\\
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
+app.use(methodOverride('X-HTTP-Method-Override'));
 app.use(cookieSession({
   name: 'session',
   keys: ['some-long-secret']
