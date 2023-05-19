@@ -1,6 +1,7 @@
 //-------------------SETUP------------------------\\
 const express = require('express');
 const cookieSession = require('cookie-session');
+const cookieParser = require('cookie-parser');
 const bcrypt = require('bcryptjs');
 const methodOverride = require('method-override');
 const app = express();
@@ -12,6 +13,7 @@ app.set("view engine", "ejs");
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
+app.use(cookieParser());
 app.use(cookieSession({
   name: 'session',
   keys: ['some-long-secret']
@@ -22,10 +24,16 @@ const urlDatabase = {
   b6UTxQ: {
     longURL: "https://www.tsn.ca",
     userID: "userRandomID",
+    visits: 0,
+    uniqueVisitors: [],
+    visitorsList: []
   },
   i3BoGr: {
     longURL: "https://www.google.ca",
     userID: "user2RandomID",
+    visits: 0,
+    uniqueVisitors: [],
+    visitorsList: []
   },
 };
 
@@ -85,11 +93,30 @@ app.get('/u/:id', (req, res) => {
   if (!user) {
     return res.status(403).send("You must be logged in to edit URLS");
   }
-  id = req.params.id;
+  const id = req.params.id;
   const longURL = urlDatabase[id].longURL;
+
   if (!longURL) {
     res.status(404).send("URL not found :(");
   }
+
+  //set cookie if no visitor_is found
+  if (!req.cookies.visitor_id) {
+    const visitorId = generateRandomID();
+    res.cookie('visitor_id', `${visitorId}`);
+    urlDatabase[id].uniqueVisitors.push(visitorId);
+  }
+
+  // Add visit entry to the visitorsList array
+  const visitEntry = {
+    timestamp: new Date(),
+    visitorId: req.cookies.visitor_id,
+  };
+
+  //add visitor information to database
+  urlDatabase[id].visitorsList.push(visitEntry);
+  urlDatabase[id].visits++;
+
   res.redirect(longURL);
 
 });
@@ -101,7 +128,12 @@ app.post('/urls/:id', (req, res) => {
     return res.status(403).send("You must be logged in to edit URLS");
   }
   id = req.params.id;
-  const templateVars = { id, longURL: urlDatabase[id].longURL, user };
+
+  const totalVisits = urlDatabase[id].visits;
+  const uniqueVisitorsCount = urlDatabase[id].uniqueVisitors.length;
+  const visits = urlDatabase[id].visitorsList;
+
+  const templateVars = { id, longURL: urlDatabase[id].longURL, user, totalVisits, uniqueVisitorsCount, visits };
   res.render('urls_show', templateVars);
 });
 
