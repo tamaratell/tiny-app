@@ -17,17 +17,17 @@ app.use(cookieParser());
 const urlDatabase = {
   b6UTxQ: {
     longURL: "https://www.tsn.ca",
-    userID: "aJ48lW",
+    userID: "userRandomID",
   },
   i3BoGr: {
     longURL: "https://www.google.ca",
-    userID: "aJ48lW",
+    userID: "user2RandomID",
   },
 };
 
 const users = {
   userRandomID: {
-    id: "aJ48lW",
+    id: "userRandomID",
     email: "user@example.com",
     password: "123",
   },
@@ -109,6 +109,10 @@ app.post("/urls", (req, res) => {
 //id is the shortURL id
 //e.g. /u/b2xVn2 is the url path for shortURL id b2xVn2
 app.get('/u/:id', (req, res) => {
+  const user = getUserbyID(req.cookies["user_id"]);
+  if (!user) {
+    return res.status(403).send("You must be logged in to edit URLS");
+  }
   id = req.params.id;
   const longURL = urlDatabase[id].longURL;
   if (!longURL) {
@@ -121,6 +125,9 @@ app.get('/u/:id', (req, res) => {
 //go to the edit page for a link from the homepage by clicking the edit button
 app.post('/urls/:id', (req, res) => {
   const user = getUserbyID(req.cookies["user_id"]);
+  if (!user) {
+    return res.status(403).send("You must be logged in to edit URLS");
+  }
   id = req.params.id;
   const templateVars = { id, longURL: urlDatabase[id].longURL, user };
   res.render('urls_show', templateVars);
@@ -128,20 +135,31 @@ app.post('/urls/:id', (req, res) => {
 
 //update a longURL (and the database) using the form on /urls/:id (edit page)
 app.post('/urls/:id/edit', (req, res) => {
+  const user = getUserbyID(req.cookies["user_id"]);
+  if (!user) {
+    return res.status(403).send("You must be logged in to edit URLS");
+  }
   const longURL = req.body.longURL;
   const id = req.params.id;
   urlDatabase[id].longURL = longURL;
-  console.log(urlDatabase);
   res.redirect('/urls');
 });
 
 
 //delete a URL resource (and remove it from url Database)
 app.post('/urls/:id/delete', (req, res) => {
+  const user = getUserbyID(req.cookies["user_id"]);
+  if (!user) {
+    return res.status(403).send("You must be logged in to delete URLS");
+  }
   const id = req.params.id;
   delete urlDatabase[id];
   res.redirect('/urls');
 });
+
+
+
+//-------------------LOGIN AND REGISTRATION ROUTES------------------------\\
 
 //get the login page
 app.get('/login', (req, res) => {
@@ -217,10 +235,17 @@ app.post('/logout', (req, res) => {
   res.redirect('/login');
 });
 
+//-------------------END OF LOGIN AND REGISTRATION ROUTES------------------------\\
+
+
 //get the URLS page, render urls_index and pass urlDatabase as templateVars.
 app.get('/urls', (req, res) => {
   const user = getUserbyID(req.cookies["user_id"]);
-  const templateVars = { urls: urlDatabase, user };
+  if (!user) {
+    return res.status(403).send("You must be logged in to view URLS");
+  }
+  const urlsForUser = getURLSforUser(req.cookies["user_id"]);
+  const templateVars = { urls: urlsForUser, user };
   console.log(templateVars);
   res.render('urls_index', templateVars);
 });
