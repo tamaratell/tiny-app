@@ -20,23 +20,10 @@
             <%= id %>
           </a>
         </p>
-        <p class="card-text">
-          Your URL has <%= totalVisits %> total visits and <%= uniqueVisitorsCount %> unique visitors.
-        </p>
-        <p class="card-text">
-          Last visits:
-        <ul style="list-style: none;">
-          <% const maxVisitors=5; // Maximum number of visitors to display %>
-            <% const displayedVisitors=visits.slice(0, maxVisitors); // Get the first five visitors %>
-              <% for (const visit of displayedVisitors) { %>
-                <li>
-                  <span style="color: #28a745;">
-                    <%= visit.timestamp %>
-                  </span> by <%= visit.visitorId %>
-                </li>
-                <% } %>
-        </ul>
-        </p>
+        <% if (currentRoute=='/urls/:id' ) { %>
+          <%- include('partials/_analytics.ejs') %>
+            <!-- Include this partial only for /route1 -->
+            <% } %>
       </div>
       <div class="card-footer text-muted" style="display: flex; flex-direction: column; align-items: center;">
         <h3>Edit</h3>

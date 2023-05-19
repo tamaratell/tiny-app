@@ -1,0 +1,19 @@
+<p class="card-text">
+  Your URL has <%= totalVisits %> total visits and <%= uniqueVisitorsCount.length %> unique visitors.
+</p>
+<% if(visits.length> 0) { %>
+  <p class="card-text">
+    Last visits:
+  <ul style="list-style: none;">
+    <% const maxVisitors=5; // Maximum number of visitors to display %>
+      <% const displayedVisitors=visits.slice(0, maxVisitors); %>
+        <% for (const visit of displayedVisitors) { %>
+          <li>
+            <span style="color: #28a745;">
+              <%= visit.timestamp %>
+            </span> by <%= visit.visitorId %>
+          </li>
+          <% } %>
+            <% } %>
+  </ul>
+  </p>

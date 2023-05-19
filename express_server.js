@@ -73,14 +73,19 @@ app.get("/urls/new", (req, res) => {
 //POST the URL created from /urls/new to /urls then render /urls:id for new URL 
 //Add new URL to urlDatabase in format id: longURL.
 app.post("/urls", (req, res) => {
+  const currentRoute = '/urls';
   const user = getUserbyID(req.session.user_id, users);
   if (!user) {
     return res.status(304).send("Only logged in users can shorten URLs");
   }
   const longURL = req.body.longURL;
   const id = generateRandomID();
-  urlDatabase[id] = { longURL, userID: user.id };
-  const templateVars = { longURL, id, user };
+  urlDatabase[id] = {
+    longURL, userID: user.id, visits: 0,
+    uniqueVisitors: [],
+    visitorsList: []
+  };
+  const templateVars = { longURL, id, user, currentRoute };
   res.render('urls_show', templateVars);
 });
 
@@ -122,6 +127,7 @@ app.get('/u/:id', (req, res) => {
 
 //go to the edit page for a link from the homepage by clicking the edit button
 app.post('/urls/:id', (req, res) => {
+  const currentRoute = '/urls/:id';
   const user = getUserbyID(req.session.user_id, users);
   if (!user) {
     return res.status(403).send("You must be logged in to edit URLS");
@@ -129,10 +135,10 @@ app.post('/urls/:id', (req, res) => {
   id = req.params.id;
 
   const totalVisits = urlDatabase[id].visits;
-  const uniqueVisitorsCount = urlDatabase[id].uniqueVisitors.length;
+  const uniqueVisitorsCount = urlDatabase[id].uniqueVisitors;
   const visits = urlDatabase[id].visitorsList;
 
-  const templateVars = { id, longURL: urlDatabase[id].longURL, user, totalVisits, uniqueVisitorsCount, visits };
+  const templateVars = { id, longURL: urlDatabase[id].longURL, user, totalVisits, uniqueVisitorsCount, visits, currentRoute };
   res.render('urls_show', templateVars);
 });
 
