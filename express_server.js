@@ -80,7 +80,6 @@ app.post("/urls", (req, res) => {
   const longURL = req.body.longURL;
   const id = generateRandomID();
   urlDatabase[id] = { longURL, userID: user.id };
-  console.log(urlDatabase);
   const templateVars = { longURL, id, user };
   res.render('urls_show', templateVars);
 });
@@ -139,7 +138,6 @@ app.post('/urls/:id', (req, res) => {
 
 //update a longURL (and the database) using the form on /urls/:id (edit page)
 app.put('/urls/:id', (req, res) => {
-  console.log("PUT REQUEST RECEIVED");
   const user = getUserbyID(req.session.user_id, users);
   if (!user) {
     return res.status(403).send("You must be logged in to edit URLS");
@@ -251,7 +249,6 @@ app.get('/urls', (req, res) => {
   }
   const urlsForUser = getURLSforUser(req.session.user_id, urlDatabase);
   const templateVars = { urls: urlsForUser, user };
-  console.log(templateVars);
   res.render('urls_index', templateVars);
 });
 
