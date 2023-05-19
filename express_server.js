@@ -1,6 +1,6 @@
 //-------------------SETUP------------------------\\
 const express = require('express');
-const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
 const app = express();
 const PORT = 8080;
@@ -10,7 +10,10 @@ app.set("view engine", "ejs");
 //------------------MIDDLEWARE---------------------\\
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
+app.use(cookieSession({
+  name: 'session',
+  keys: ['some-long-secret']
+}));
 
 //-------------------OBJECTS------------------------\\
 const urlDatabase = {
@@ -81,7 +84,7 @@ const getURLSforUser = (user_id) => {
 //-------------------ROUTES------------------------\\
 //get the new URL form page
 app.get("/urls/new", (req, res) => {
-  const user = getUserbyID(req.cookies["user_id"]);
+  const user = getUserbyID(req.session.user_id);
   if (!user) {
     return res.redirect('/login');
   }
@@ -92,7 +95,7 @@ app.get("/urls/new", (req, res) => {
 //POST the URL created from /urls/new to /urls then render /urls:id for new URL 
 //Add new URL to urlDatabase in format id: longURL.
 app.post("/urls", (req, res) => {
-  const user = getUserbyID(req.cookies["user_id"]);
+  const user = getUserbyID(req.session.user_id);
   if (!user) {
     return res.status(304).send("Only logged in users can shorten URLs");
   }
@@ -108,7 +111,7 @@ app.post("/urls", (req, res) => {
 //id is the shortURL id
 //e.g. /u/b2xVn2 is the url path for shortURL id b2xVn2
 app.get('/u/:id', (req, res) => {
-  const user = getUserbyID(req.cookies["user_id"]);
+  const user = getUserbyID(req.session.user_id);
   if (!user) {
     return res.status(403).send("You must be logged in to edit URLS");
   }
@@ -123,7 +126,7 @@ app.get('/u/:id', (req, res) => {
 
 //go to the edit page for a link from the homepage by clicking the edit button
 app.post('/urls/:id', (req, res) => {
-  const user = getUserbyID(req.cookies["user_id"]);
+  const user = getUserbyID(req.session.user_id);
   if (!user) {
     return res.status(403).send("You must be logged in to edit URLS");
   }
@@ -134,7 +137,7 @@ app.post('/urls/:id', (req, res) => {
 
 //update a longURL (and the database) using the form on /urls/:id (edit page)
 app.post('/urls/:id/edit', (req, res) => {
-  const user = getUserbyID(req.cookies["user_id"]);
+  const user = getUserbyID(req.session.user_id);
   if (!user) {
     return res.status(403).send("You must be logged in to edit URLS");
   }
@@ -147,7 +150,7 @@ app.post('/urls/:id/edit', (req, res) => {
 
 //delete a URL resource (and remove it from url Database)
 app.post('/urls/:id/delete', (req, res) => {
-  const user = getUserbyID(req.cookies["user_id"]);
+  const user = getUserbyID(req.session.user_id);
   if (!user) {
     return res.status(403).send("You must be logged in to delete URLS");
   }
@@ -162,7 +165,7 @@ app.post('/urls/:id/delete', (req, res) => {
 
 //get the login page
 app.get('/login', (req, res) => {
-  const user = getUserbyID(req.cookies["user_id"]);
+  const user = getUserbyID(req.session.user_id);
   if (user) {
     return res.redirect('/urls');
   }
@@ -191,7 +194,8 @@ app.post('/login', (req, res) => {
       res.status(401).send("Invalid credentials");
       return;
     }
-    res.cookie('user_id', `${user.id}`);
+    //res.cookie('user_id', `${user.id}`);
+    req.session.user_id = `${user.id}`;
     res.redirect('/urls');
   }
 
@@ -199,7 +203,7 @@ app.post('/login', (req, res) => {
 
 //get the registration page
 app.get('/register', (req, res) => {
-  const user = getUserbyID(req.cookies["user_id"]);
+  const user = getUserbyID(req.session.user_id);
   if (user) {
     return res.redirect('/urls');
   }
@@ -224,13 +228,14 @@ app.post('/register', (req, res) => {
 
   const id = generateRandomID();
   users[id] = { id, email, password };
-  res.cookie('user_id', `${id}`);
+  //res.cookie('user_id', `${id}`);
+  req.session.user_id = `${id}`;
   res.redirect('/urls');
 });
 
 //logout && clear cookies
 app.post('/logout', (req, res) => {
-  res.clearCookie('user_id');
+  req.session = null;
   res.redirect('/login');
 });
 
@@ -239,11 +244,11 @@ app.post('/logout', (req, res) => {
 
 //get the URLS page, render urls_index and pass urlDatabase as templateVars.
 app.get('/urls', (req, res) => {
-  const user = getUserbyID(req.cookies["user_id"]);
+  const user = getUserbyID(req.session.user_id);
   if (!user) {
     return res.status(403).send("You must be logged in to view URLS");
   }
-  const urlsForUser = getURLSforUser(req.cookies["user_id"]);
+  const urlsForUser = getURLSforUser(req.session.user_id);
   const templateVars = { urls: urlsForUser, user };
   console.log(templateVars);
   res.render('urls_index', templateVars);
