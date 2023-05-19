@@ -41,50 +41,18 @@ const users = {
 };
 //-------------------FUNCTIONS------------------------\\
 
-const generateRandomID = () => {
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890';
-  let id = "";
-  for (const character of characters) {
-    if (id.length < 6) {
-      id += characters[Math.floor(Math.random() * (characters.length))];
-    }
-  }
-  return id;
-};
-
-const getUserbyID = (user_id) => {
-  for (const user in users) {
-    if (user === user_id) {
-      return users[user];
-    }
-  }
-};
-
-const getUserByEmail = (user_email) => {
-  for (const user in users) {
-    const userInformation = users[user];
-    if (userInformation.email === user_email) {
-      return userInformation;
-    }
-  }
-  return null;
-};
-
-const getURLSforUser = (user_id) => {
-  let urlsForUser = {};
-  for (const url in urlDatabase) {
-    if (urlDatabase[url].userID === user_id) {
-      urlsForUser[url] = urlDatabase[url];
-    }
-  }
-  return urlsForUser;
-};
+const {
+  generateRandomID,
+  getUserbyID,
+  getUserByEmail,
+  getURLSforUser
+} = require('./helpers');
 
 
 //-------------------ROUTES------------------------\\
 //get the new URL form page
 app.get("/urls/new", (req, res) => {
-  const user = getUserbyID(req.session.user_id);
+  const user = getUserbyID(req.session.user_id, users);
   if (!user) {
     return res.redirect('/login');
   }
@@ -95,7 +63,7 @@ app.get("/urls/new", (req, res) => {
 //POST the URL created from /urls/new to /urls then render /urls:id for new URL 
 //Add new URL to urlDatabase in format id: longURL.
 app.post("/urls", (req, res) => {
-  const user = getUserbyID(req.session.user_id);
+  const user = getUserbyID(req.session.user_id, users);
   if (!user) {
     return res.status(304).send("Only logged in users can shorten URLs");
   }
@@ -111,7 +79,7 @@ app.post("/urls", (req, res) => {
 //id is the shortURL id
 //e.g. /u/b2xVn2 is the url path for shortURL id b2xVn2
 app.get('/u/:id', (req, res) => {
-  const user = getUserbyID(req.session.user_id);
+  const user = getUserbyID(req.session.user_id, users);
   if (!user) {
     return res.status(403).send("You must be logged in to edit URLS");
   }
@@ -126,7 +94,7 @@ app.get('/u/:id', (req, res) => {
 
 //go to the edit page for a link from the homepage by clicking the edit button
 app.post('/urls/:id', (req, res) => {
-  const user = getUserbyID(req.session.user_id);
+  const user = getUserbyID(req.session.user_id, users);
   if (!user) {
     return res.status(403).send("You must be logged in to edit URLS");
   }
@@ -137,7 +105,7 @@ app.post('/urls/:id', (req, res) => {
 
 //update a longURL (and the database) using the form on /urls/:id (edit page)
 app.post('/urls/:id/edit', (req, res) => {
-  const user = getUserbyID(req.session.user_id);
+  const user = getUserbyID(req.session.user_id, users);
   if (!user) {
     return res.status(403).send("You must be logged in to edit URLS");
   }
@@ -150,7 +118,7 @@ app.post('/urls/:id/edit', (req, res) => {
 
 //delete a URL resource (and remove it from url Database)
 app.post('/urls/:id/delete', (req, res) => {
-  const user = getUserbyID(req.session.user_id);
+  const user = getUserbyID(req.session.user_id, users);
   if (!user) {
     return res.status(403).send("You must be logged in to delete URLS");
   }
@@ -165,7 +133,7 @@ app.post('/urls/:id/delete', (req, res) => {
 
 //get the login page
 app.get('/login', (req, res) => {
-  const user = getUserbyID(req.session.user_id);
+  const user = getUserbyID(req.session.user_id, users);
   if (user) {
     return res.redirect('/urls');
   }
@@ -177,7 +145,7 @@ app.get('/login', (req, res) => {
 app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  const user = getUserByEmail(email);
+  const user = getUserByEmail(email, users);
 
   if (email === "" || password === "") {
     res.status(400).send("Error: credentials cannot be empty");
@@ -194,7 +162,6 @@ app.post('/login', (req, res) => {
       res.status(401).send("Invalid credentials");
       return;
     }
-    //res.cookie('user_id', `${user.id}`);
     req.session.user_id = `${user.id}`;
     res.redirect('/urls');
   }
@@ -203,7 +170,7 @@ app.post('/login', (req, res) => {
 
 //get the registration page
 app.get('/register', (req, res) => {
-  const user = getUserbyID(req.session.user_id);
+  const user = getUserbyID(req.session.user_id, users);
   if (user) {
     return res.redirect('/urls');
   }
@@ -221,14 +188,13 @@ app.post('/register', (req, res) => {
     return;
   }
 
-  if (getUserByEmail(email)) {
+  if (getUserByEmail(email, users)) {
     res.status(401).send("Error: Please try again");
     return;
   }
 
   const id = generateRandomID();
   users[id] = { id, email, password };
-  //res.cookie('user_id', `${id}`);
   req.session.user_id = `${id}`;
   res.redirect('/urls');
 });
@@ -244,11 +210,11 @@ app.post('/logout', (req, res) => {
 
 //get the URLS page, render urls_index and pass urlDatabase as templateVars.
 app.get('/urls', (req, res) => {
-  const user = getUserbyID(req.session.user_id);
+  const user = getUserbyID(req.session.user_id, users);
   if (!user) {
     return res.status(403).send("You must be logged in to view URLS");
   }
-  const urlsForUser = getURLSforUser(req.session.user_id);
+  const urlsForUser = getURLSforUser(req.session.user_id, urlDatabase);
   const templateVars = { urls: urlsForUser, user };
   console.log(templateVars);
   res.render('urls_index', templateVars);
@@ -259,4 +225,3 @@ app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
 });
 
-//res.status(403).send("You must be logged in to view URLS");
