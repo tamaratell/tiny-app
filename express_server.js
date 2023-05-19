@@ -11,7 +11,7 @@ app.set("view engine", "ejs");
 //------------------MIDDLEWARE---------------------\\
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(methodOverride('X-HTTP-Method-Override'));
+app.use(methodOverride('_method'));
 app.use(cookieSession({
   name: 'session',
   keys: ['some-long-secret']
@@ -106,7 +106,8 @@ app.post('/urls/:id', (req, res) => {
 });
 
 //update a longURL (and the database) using the form on /urls/:id (edit page)
-app.post('/urls/:id/edit', (req, res) => {
+app.put('/urls/:id', (req, res) => {
+  console.log("PUT REQUEST RECEIVED");
   const user = getUserbyID(req.session.user_id, users);
   if (!user) {
     return res.status(403).send("You must be logged in to edit URLS");
@@ -119,7 +120,7 @@ app.post('/urls/:id/edit', (req, res) => {
 
 
 //delete a URL resource (and remove it from url Database)
-app.post('/urls/:id/delete', (req, res) => {
+app.delete('/urls/:id/delete', (req, res) => {
   const user = getUserbyID(req.session.user_id, users);
   if (!user) {
     return res.status(403).send("You must be logged in to delete URLS");

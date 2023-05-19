@@ -39,7 +39,8 @@
                 </form>
               </td>
               <td>
-                <form class="form-inline" action="/urls/<%=id%>/delete" method="POST">
+                <form class="form-inline" method="POST" action="/urls/<%=id%>/delete?_method=DELETE">
+                  <input type="hidden" name="_method" value="DELETE">
                   <button type="submit" class="btn btn-primary" style="background-color:red; border: solid red 1px">
                     Delete
                   </button>
