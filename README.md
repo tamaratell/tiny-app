@@ -6,6 +6,7 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 !["TinyURL Home Page"](#)
 !["Feature: Tracking User Analytics"](#)
+!["TinyURL Login Page"](#)
 
 ## Dependencies
 
