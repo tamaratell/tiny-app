@@ -1,8 +1,7 @@
 //-------------------SETUP------------------------\\
 const express = require('express');
-const req = require('express/lib/request');
 const cookieParser = require('cookie-parser');
-const res = require('express/lib/response');
+const bcrypt = require('bcryptjs');
 const app = express();
 const PORT = 8080;
 
@@ -29,12 +28,12 @@ const users = {
   userRandomID: {
     id: "userRandomID",
     email: "user@example.com",
-    password: "123",
+    password: bcrypt.hashSync("123", 10)
   },
   user2RandomID: {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "123",
+    password: bcrypt.hashSync("123", 10)
   },
 };
 //-------------------FUNCTIONS------------------------\\
@@ -188,7 +187,7 @@ app.post('/login', (req, res) => {
   }
 
   if (user) {
-    if (password !== user.password) {
+    if (!bcrypt.compareSync(password, user.password)) {
       res.status(401).send("Invalid credentials");
       return;
     }
@@ -211,7 +210,7 @@ app.get('/register', (req, res) => {
 //register && set cookie
 app.post('/register', (req, res) => {
   const email = req.body.email;
-  const password = req.body.password;
+  const password = bcrypt.hashSync(req.body.password, 10);
 
   if (email === "" || password === "") {
     res.status(404).send("Error: credentials cannot be empty");
