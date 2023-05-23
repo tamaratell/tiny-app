@@ -49,6 +49,7 @@ const users = {
     password: bcrypt.hashSync("123", 10)
   },
 };
+
 //-------------------FUNCTIONS------------------------\\
 
 const {
