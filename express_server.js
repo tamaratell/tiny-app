@@ -33,7 +33,9 @@ const {
 } = require('./helpers');
 
 
-//-------------------ROUTES------------------------\\
+//------------------- CRUD ROUTES------------------------\\
+
+//------------------- GET ROUTES------------------------\\
 
 //landing page
 app.get('/', (req, res) => {
@@ -53,25 +55,6 @@ app.get("/urls/new", (req, res) => {
   }
   const templateVars = { user };
   res.render("urls_new", templateVars);
-});
-
-//POST the URL created from /urls/new to /urls then render /urls:id for new URL 
-//Add new URL to urlDatabase in format id: longURL.
-app.post("/urls", (req, res) => {
-  const currentRoute = '/urls';
-  const user = getUserbyID(req.session.user_id, users);
-  if (!user) {
-    return res.status(304).send("Only logged in users can shorten URLs");
-  }
-  const longURL = req.body.longURL;
-  const id = generateRandomID();
-  urlDatabase[id] = {
-    longURL, userID: user.id, visits: 0,
-    uniqueVisitors: [],
-    visitorsList: []
-  };
-  const templateVars = { longURL, id, user, currentRoute };
-  res.render('urls_show', templateVars);
 });
 
 //get longURL page by pressing its shortURL on urls_show template. 
@@ -128,6 +111,61 @@ app.get('/urls/:id', (req, res) => {
   res.render('urls_show', templateVars);
 });
 
+//get the login page
+app.get('/login', (req, res) => {
+  const user = getUserbyID(req.session.user_id, users);
+  if (user) {
+    return res.redirect('/urls');
+  }
+  const templateVars = { user };
+  res.render('urls_login', templateVars);
+});
+
+
+//get the registration page
+app.get('/register', (req, res) => {
+  const user = getUserbyID(req.session.user_id, users);
+  if (user) {
+    return res.redirect('/urls');
+  }
+  const templateVars = { user };
+  res.render('urls_register', templateVars);
+});
+
+
+//get the URLS page, render urls_index and pass urlDatabase as templateVars.
+app.get('/urls', (req, res) => {
+  const user = getUserbyID(req.session.user_id, users);
+  if (!user) {
+    return res.status(403).send("You must be logged in to view URLS");
+  }
+  const urlsForUser = getURLSforUser(req.session.user_id, urlDatabase);
+  const templateVars = { urls: urlsForUser, user };
+  res.render('urls_index', templateVars);
+});
+
+
+//------------------- POST, PUT & DELETE ROUTES------------------------\\
+
+//POST the URL created from /urls/new to /urls then render /urls:id for new URL 
+//Add new URL to urlDatabase in format id: longURL.
+app.post("/urls", (req, res) => {
+  const currentRoute = '/urls';
+  const user = getUserbyID(req.session.user_id, users);
+  if (!user) {
+    return res.status(304).send("Only logged in users can shorten URLs");
+  }
+  const longURL = req.body.longURL;
+  const id = generateRandomID();
+  urlDatabase[id] = {
+    longURL, userID: user.id, visits: 0,
+    uniqueVisitors: [],
+    visitorsList: []
+  };
+  const templateVars = { longURL, id, user, currentRoute };
+  res.render('urls_show', templateVars);
+});
+
 //update a longURL (and the database) using the form on /urls/:id (edit page)
 app.put('/urls/:id', (req, res) => {
   const user = getUserbyID(req.session.user_id, users);
@@ -158,19 +196,6 @@ app.delete('/urls/:id/delete', (req, res) => {
 });
 
 
-
-//-------------------LOGIN AND REGISTRATION ROUTES------------------------\\
-
-//get the login page
-app.get('/login', (req, res) => {
-  const user = getUserbyID(req.session.user_id, users);
-  if (user) {
-    return res.redirect('/urls');
-  }
-  const templateVars = { user };
-  res.render('urls_login', templateVars);
-});
-
 //login && set cookie 
 app.post('/login', (req, res) => {
   const email = req.body.email;
@@ -198,15 +223,6 @@ app.post('/login', (req, res) => {
 
 });
 
-//get the registration page
-app.get('/register', (req, res) => {
-  const user = getUserbyID(req.session.user_id, users);
-  if (user) {
-    return res.redirect('/urls');
-  }
-  const templateVars = { user };
-  res.render('urls_register', templateVars);
-});
 
 //register && set cookie
 app.post('/register', (req, res) => {
@@ -235,20 +251,8 @@ app.post('/logout', (req, res) => {
   res.redirect('/login');
 });
 
-//-------------------END OF LOGIN AND REGISTRATION ROUTES------------------------\\
 
-
-//get the URLS page, render urls_index and pass urlDatabase as templateVars.
-app.get('/urls', (req, res) => {
-  const user = getUserbyID(req.session.user_id, users);
-  if (!user) {
-    return res.status(403).send("You must be logged in to view URLS");
-  }
-  const urlsForUser = getURLSforUser(req.session.user_id, urlDatabase);
-  const templateVars = { urls: urlsForUser, user };
-  res.render('urls_index', templateVars);
-});
-
+//------------------- END OF CRUD ROUTES ------------------------\\
 
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
