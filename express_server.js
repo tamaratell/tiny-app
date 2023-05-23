@@ -34,6 +34,17 @@ const {
 
 
 //-------------------ROUTES------------------------\\
+
+//landing page
+app.get('/', (req, res) => {
+  const user = getUserbyID(req.session.user_id, users);
+  if (!user) {
+    return res.redirect('/login');
+  }
+  res.redirect('/urls');
+});
+
+
 //get the new URL form page
 app.get("/urls/new", (req, res) => {
   const user = getUserbyID(req.session.user_id, users);
