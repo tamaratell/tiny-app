@@ -110,13 +110,14 @@ app.get('/u/:id', (req, res) => {
 
 });
 
-//go to the edit page for a link from the homepage by clicking the edit button
-app.post('/urls/:id', (req, res) => {
+//get the edit page for a link from the homepage by clicking the edit button
+app.get('/urls/:id', (req, res) => {
   const currentRoute = '/urls/:id';
   const user = getUserbyID(req.session.user_id, users);
   if (!user) {
     return res.status(403).send("You must be logged in to edit URLS");
   }
+
   id = req.params.id;
 
   const totalVisits = urlDatabase[id].visits;
