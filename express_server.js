@@ -135,6 +135,11 @@ app.put('/urls/:id', (req, res) => {
     return res.status(403).send("You must be logged in to edit URLS");
   }
   const longURL = req.body.longURL;
+
+  if (!longURL) {
+    return res.status(403).send("URL field cannot be empty");
+  }
+
   const id = req.params.id;
   urlDatabase[id].longURL = longURL;
   res.redirect('/urls');
