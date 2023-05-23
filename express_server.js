@@ -166,34 +166,6 @@ app.post("/urls", (req, res) => {
   res.render('urls_show', templateVars);
 });
 
-//update a longURL (and the database) using the form on /urls/:id (edit page)
-app.put('/urls/:id', (req, res) => {
-  const user = getUserbyID(req.session.user_id, users);
-  if (!user) {
-    return res.status(403).send("You must be logged in to edit URLS");
-  }
-  const longURL = req.body.longURL;
-
-  if (!longURL) {
-    return res.status(403).send("URL field cannot be empty");
-  }
-
-  const id = req.params.id;
-  urlDatabase[id].longURL = longURL;
-  res.redirect('/urls');
-});
-
-
-//delete a URL resource (and remove it from url Database)
-app.delete('/urls/:id/delete', (req, res) => {
-  const user = getUserbyID(req.session.user_id, users);
-  if (!user) {
-    return res.status(403).send("You must be logged in to delete URLS");
-  }
-  const id = req.params.id;
-  delete urlDatabase[id];
-  res.redirect('/urls');
-});
 
 
 //login && set cookie 
@@ -251,6 +223,35 @@ app.post('/logout', (req, res) => {
   res.redirect('/login');
 });
 
+
+//update a longURL (and the database) using the form on /urls/:id (edit page)
+app.put('/urls/:id', (req, res) => {
+  const user = getUserbyID(req.session.user_id, users);
+  if (!user) {
+    return res.status(403).send("You must be logged in to edit URLS");
+  }
+  const longURL = req.body.longURL;
+
+  if (!longURL) {
+    return res.status(403).send("URL field cannot be empty");
+  }
+
+  const id = req.params.id;
+  urlDatabase[id].longURL = longURL;
+  res.redirect('/urls');
+});
+
+
+//delete a URL resource (and remove it from url Database)
+app.delete('/urls/:id/delete', (req, res) => {
+  const user = getUserbyID(req.session.user_id, users);
+  if (!user) {
+    return res.status(403).send("You must be logged in to delete URLS");
+  }
+  const id = req.params.id;
+  delete urlDatabase[id];
+  res.redirect('/urls');
+});
 
 //------------------- END OF CRUD ROUTES ------------------------\\
 
