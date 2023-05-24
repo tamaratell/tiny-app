@@ -93,7 +93,7 @@ app.get('/u/:id', (req, res) => {
 
 });
 
-//get the edit page for a link from the homepage by clicking the edit button
+// Get the edit page for a link from the homepage by clicking the edit button
 app.get('/urls/:id', (req, res) => {
   const currentRoute = '/urls/:id';
   const user = getUserbyID(req.session.user_id, users);
@@ -101,15 +101,25 @@ app.get('/urls/:id', (req, res) => {
     return res.status(403).send("You must be logged in to edit URLS");
   }
 
-  id = req.params.id;
+  const id = req.params.id;
+  const url = urlDatabase[id];
 
-  const totalVisits = urlDatabase[id].visits;
-  const uniqueVisitorsCount = urlDatabase[id].uniqueVisitors;
-  const visits = urlDatabase[id].visitorsList;
+  if (!url) {
+    return res.status(404).send("URL not found");
+  }
 
-  const templateVars = { id, longURL: urlDatabase[id].longURL, user, totalVisits, uniqueVisitorsCount, visits, currentRoute };
+  if (url.userID !== user.id) {
+    return res.status(403).send("You don't have permission to edit this URL");
+  }
+
+  const totalVisits = url.visits;
+  const uniqueVisitorsCount = url.uniqueVisitors;
+  const visits = url.visitorsList;
+
+  const templateVars = { id, longURL: url.longURL, user, totalVisits, uniqueVisitorsCount, visits, currentRoute };
   res.render('urls_show', templateVars);
 });
+
 
 //get the login page
 app.get('/login', (req, res) => {
